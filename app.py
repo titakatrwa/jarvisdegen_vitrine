@@ -11,38 +11,60 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-def get_image_base64_explicit(path, forced_format=None):
+# ==============================================================================
+# SECTION DIAGNOSTIC & CHARGEMENT
+# ==============================================================================
+st.sidebar.title("🛠️ Diagnostic Fichiers")
+
+def load_and_debug_image(relative_path):
     """
-    Lit un fichier image local et le convertit en chaîne Base64.
-    Recherche automatique du chemin relatif et absolu.
+    Tente de charger une image et affiche des logs de débogage dans la barre latérale.
     """
-    # 1. Vérification si le chemin existe tel quel
-    target_path = path
-    if not os.path.exists(target_path):
-        # 2. Sinon, recherche par rapport au dossier du script courant
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        target_path = os.path.join(base_dir, path)
+    # 1. Obtenir le dossier absolu du script
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    absolute_path = os.path.join(current_dir, relative_path)
+    
+    st.sidebar.write(f"**Recherche :** `{relative_path}`")
+    
+    final_path = None
+    if os.path.exists(relative_path):
+        final_path = relative_path
+    elif os.path.exists(absolute_path):
+        final_path = absolute_path
 
-    if os.path.exists(target_path):
-        # Détermination du format d'image (png, jpeg, etc.)
-        if forced_format:
-            img_format = forced_format
-        else:
-            ext = os.path.splitext(target_path)[1].lower().replace('.', '')
-            img_format = 'jpeg' if ext in ['jpg', 'jpeg'] else 'png'
+    if final_path:
+        st.sidebar.success(f"✅ Trouvé : `{final_path}`")
+        try:
+            with open(final_path, "rb") as f:
+                data = f.read()
+                encoded = base64.b64encode(data).decode('utf-8')
+                
+                # Détermination de l'extension
+                ext = os.path.splitext(final_path)[1].lower().replace('.', '')
+                mime_type = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png'
+                
+                st.sidebar.info(f"Taille : {len(data)} octets | MIME : {mime_type}")
+                return f"data:{mime_type};base64,{encoded}"
+        except Exception as e:
+            st.sidebar.error(f"❌ Erreur de lecture : {e}")
+            return ""
+    else:
+        st.sidebar.error(f"❌ FICHIER INTROUVABLE !")
+        st.sidebar.write("Contenu du dossier courant :")
+        st.sidebar.code(os.listdir(current_dir))
+        if os.path.exists(os.path.join(current_dir, "static")):
+            st.sidebar.write("Contenu de static/ :")
+            st.sidebar.code(os.listdir(os.path.join(current_dir, "static")))
+        return ""
 
-        with open(target_path, "rb") as image_file:
-            encoded = base64.b64encode(image_file.read()).decode('utf-8')
-            return f"data:image/{img_format};base64,{encoded}"
-            
-    # Retourne une chaîne vide si l'image n'est pas trouvée
-    return ""
+# Chargement avec logs
+logo_b64 = load_and_debug_image("static/logo.png")
+hero_b64 = load_and_debug_image("static/hero.jpg")
+bras_b64 = load_and_debug_image("static/bras_croisees.png")
 
-# Chargement sécurisé avec types MIME explicitement définis
-logo_b64 = get_image_base64_explicit("static/logo.png", forced_format="png")
-hero_b64 = get_image_base64_explicit("static/hero.jpg", forced_format="jpeg")
-bras_b64 = get_image_base64_explicit("static/bras_croisees.png", forced_format="png")
-
+# ==============================================================================
+# STYLE STREAMLIT
+# ==============================================================================
 st.markdown("""
     <style>
         #MainMenu {visibility: hidden;}
@@ -58,6 +80,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# ==============================================================================
+# HTML TEMPLATE
+# ==============================================================================
 HTML_TEMPLATE = f"""
 <!DOCTYPE html>
 <html lang="fr" class="dark">
@@ -109,11 +134,6 @@ HTML_TEMPLATE = f"""
             border-color: #00f0ff;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
         }}
-        .border-glow-burn:hover {{
-            border-color: #ff6b00;
-            box-shadow: 0 0 15px rgba(255, 107, 0, 0.4);
-        }}
-        
         @keyframes spinSlow {{
             from {{ transform: rotate(0deg); }}
             to {{ transform: rotate(360deg); }}
@@ -244,102 +264,16 @@ HTML_TEMPLATE = f"""
         </div>
     </section>
 
-    <!-- ROADMAP & FLYWHEEL SECTION -->
-    <section id="roadmap" class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <!-- FLYWHEEL -->
-        <div class="bg-cardBg border-glow p-6 rounded-xl flex flex-col justify-between relative overflow-hidden">
-            <h3 class="font-orbitron text-lg font-bold text-white text-center mb-4">THE $JDEGEN FLYWHEEL</h3>
-            
-            <div class="relative my-8 flex justify-center items-center h-64">
-                <div class="absolute w-56 h-56 rounded-full border-2 border-dashed border-cyanNeon/60 animate-spin-slow"></div>
-
-                <div class="absolute w-64 h-64 flex items-center justify-center pointer-events-none">
-                    <div class="absolute -top-1 text-cyanNeon animate-pulse">
-                        <svg class="w-6 h-6 transform rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="absolute -bottom-1 text-profitGreen animate-pulse">
-                        <svg class="w-6 h-6 transform -rotate-90" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                </div>
-
-                <div class="z-10 flex flex-col items-center justify-center text-center">
-                    <span class="font-orbitron font-extrabold text-cyanNeon text-base tracking-widest mb-1">$JDEGEN</span>
-                    <div class="flex items-center gap-1.5 my-1">
-                        <span class="font-orbitron text-xs font-bold text-burnOrange tracking-wider">BURN</span>
-                        <div class="text-burnOrange animate-flame">
-                            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-1.048c-2.5 1.249-4.87 3.324-5.32 6.002-.32 1.905.15 3.82 1.28 5.308-1.5-.27-2.82-.87-3.905-1.745a1 1 0 00-1.52 1.205c1.69 2.58 4.54 4.28 7.74 4.67 5.12.63 9.8-3.05 10.23-8.15.22-2.58-.69-5.11-2.45-6.94-.31-.33-.78-.45-1.205-.3-.425.15-.72.525-.72.98 0 1.16-.39 2.27-1.12 3.17-.55-.91-1.1-1.89-1.56-3.15z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="absolute top-2 left-2 md:left-6 text-xs font-mono text-cyanNeon bg-black/90 p-2.5 rounded-lg border border-cyanNeon/40 backdrop-blur-md shadow-lg">
-                    <span class="font-bold text-sm block font-orbitron">70%</span> RE-TRADE
-                </div>
-
-                <div class="absolute bottom-2 right-2 md:right-6 text-xs font-mono text-profitGreen bg-black/90 p-2.5 rounded-lg border border-profitGreen/40 backdrop-blur-md shadow-lg">
-                    <span class="font-bold text-sm block font-orbitron">30%</span> BUYBACK
-                </div>
-            </div>
-
-            <p class="text-center text-xs font-mono text-gray-400 mt-2">
-                Profits from trading fuel the engine.<br>More volume. More burns. More scarcity.
-            </p>
-        </div>
-
-        <!-- ROADMAP -->
-        <div class="bg-cardBg border-glow p-6 rounded-xl">
-            <h3 class="font-orbitron text-lg font-bold text-white mb-6">ROADMAP</h3>
-
-            <div class="space-y-6 font-mono text-xs">
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">01</div>
-                    <div>
-                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 01 - AWAKEN JARVIS</h4>
-                        <p class="text-gray-400 mt-1">Branding • AI personality • Architecture • Paper trading</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">02</div>
-                    <div>
-                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 02 - CONNECT JARVIS</h4>
-                        <p class="text-gray-400 mt-1">Solana data • Market scanner • Risk engine • Telegram &amp; X</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">03</div>
-                    <div>
-                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 03 - RELEASE $JDEGEN</h4>
-                        <p class="text-gray-400 mt-1">Fair launch • Token deployment • Public treasury</p>
-                    </div>
-                </div>
-
-                <div class="flex gap-4">
-                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">04</div>
-                    <div>
-                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 04 - AUTONOMOUS MODE</h4>
-                        <p class="text-gray-400 mt-1">Live trading • Public trades • Buyback &amp; burn • Dashboard</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- MATRIX CTA SECTION -->
     <section class="max-w-7xl mx-auto px-6 py-8">
         <div class="bg-cardBg border-glow rounded-2xl p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative overflow-hidden">
             
-            <!-- Robot Image (bras_croisees.png) -->
-            <div class="lg:col-span-4 flex justify-center lg:justify-start">
-                <img src="{bras_b64}" alt="Jarvis Robot Bras Croisés" class="max-h-72 w-auto object-contain drop-shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+            <!-- CONTENEUR IMAGE BRAS CROISES -->
+            <div class="lg:col-span-4 flex justify-center lg:justify-start items-center min-h-[250px]">
+                <img src="{bras_b64}" 
+                     alt="Jarvis Robot Bras Croisés" 
+                     style="max-height: 280px; width: auto; display: block; visibility: visible;"
+                     class="object-contain drop-shadow-[0_0_20px_rgba(0,240,255,0.3)]">
             </div>
 
             <!-- Middle Text & Buttons -->
