@@ -1,74 +1,108 @@
-from flask import Flask, render_template_string, request, jsonify
+import streamlit as st
+import streamlit.components.v1 as components
+import base64
+import os
 
-app = Flask(__name__)
+# Configuration de la page Streamlit
+st.set_page_config(
+    page_title="JARVISDEGEN | $JDEGEN on Solana",
+    page_icon="🤖",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-# Template HTML/CSS/JS complet avec Tailwind CSS, effets Neon et police Orbitron
-HTML_TEMPLATE = """
+# Fonction pour convertir une image locale en base64 pour l'injecter dans le HTML
+def get_image_base64(path):
+    if os.path.exists(path):
+        with open(path, "rb") as image_file:
+            encoded = base64.b64encode(image_file.read()).decode()
+            ext = path.split('.')[-1]
+            return f"data:image/{ext};base64,{encoded}"
+    return ""
+
+# Récupération des images depuis le dossier static (si présentes)
+logo_b64 = get_image_base64("static/logo.png")
+hero_b64 = get_image_base64("static/hero.jpg")
+
+# Masquer la barre de navigation et le footer par défaut de Streamlit
+st.markdown("""
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        .block-container {
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
+            max-width: 100% !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Code HTML complet
+HTML_TEMPLATE = f"""
 <!DOCTYPE html>
 <html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JARVISDEGEN | $JDEGEN on Solana</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
+        tailwind.config = {{
+            theme: {{
+                extend: {{
+                    colors: {{
                         void: '#070c14',
                         cardBg: 'rgba(15, 25, 42, 0.75)',
                         cyanNeon: '#00f0ff',
                         aquaNeon: '#00fcc2',
                         profitGreen: '#c0ff6b',
                         riskRed: '#ff4d4d',
-                    },
-                    fontFamily: {
+                    }},
+                    fontFamily: {{
                         orbitron: ['Orbitron', 'sans-serif'],
                         rajdhani: ['Rajdhani', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
-                    }
-                }
-            }
-        }
+                    }}
+                }}
+            }}
+        }}
     </script>
     
     <style>
-        body {
+        body {{
             background-color: #070c14;
             color: #e6f1ff;
             background-image: 
                 radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
                 radial-gradient(circle at 85% 60%, rgba(0, 252, 194, 0.05) 0%, transparent 40%);
-        }
-        .glow-cyan {
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-        }
-        .border-glow {
+        }}
+        .glow-cyan {{
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
+        }}
+        .border-glow {{
             border: 1px solid rgba(0, 240, 255, 0.25);
-        }
-        .border-glow:hover {
+        }}
+        .border-glow:hover {{
             border-color: #00f0ff;
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-        }
-        .text-glow {
+        }}
+        .text-glow {{
             text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
-        }
+        }}
     </style>
 </head>
-<body class="font-rajdhani antialiased selection:bg-cyanNeon selection:text-black">
+<body class="font-rajdhani antialiased selection:bg-cyanNeon selection:text-black min-h-screen">
 
     <!-- NAVIGATION BAR -->
-    <nav class="border-b border-gray-800/80 bg-void/80 backdrop-blur-md sticky top-0 z-50 px-6 py-4">
+    <nav class="border-b border-gray-800/80 bg-void/80 backdrop-blur-md sticky top-0 z-50 px-6 py-3">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-cyanNeon/20 border border-cyanNeon flex items-center justify-center font-orbitron font-bold text-cyanNeon">
-                    J
-                </div>
+                <img src="{logo_b64}" alt="Jarvis Logo" class="w-10 h-10 rounded-full border border-cyanNeon object-cover">
                 <div>
                     <h1 class="font-orbitron font-extrabold text-lg tracking-wider text-white">JARVISDEGEN</h1>
                     <span class="text-xs font-mono text-cyanNeon tracking-widest">$JDEGEN</span>
@@ -133,13 +167,16 @@ HTML_TEMPLATE = """
             </div>
         </div>
 
-        <!-- Center Image Avatar Placeholder -->
+        <!-- Center Image Avatar (HERO IMAGE) -->
         <div class="lg:col-span-3 flex justify-center">
-            <div class="relative w-64 h-80 rounded-2xl bg-gradient-to-b from-cyanNeon/20 to-transparent border border-cyanNeon/30 flex flex-col items-center justify-center overflow-hidden glow-cyan">
-                <!-- Replace with actual AI agent image -->
-                <div class="text-7xl mb-4">🤖</div>
-                <div class="font-orbitron text-cyanNeon text-sm tracking-widest font-bold">JARVIS AGENT</div>
-                <div class="text-xs text-gray-400 font-mono mt-1">AUTONOMOUS MODE</div>
+            <div class="relative w-full max-w-xs h-[420px] rounded-2xl bg-cardBg border border-cyanNeon/40 flex flex-col items-center justify-between p-3 overflow-hidden glow-cyan group">
+                <div class="w-full h-full rounded-xl overflow-hidden relative border border-cyanNeon/20">
+                    <img src="{hero_b64}" alt="Jarvis AI Agent" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="mt-2 text-center">
+                    <div class="font-orbitron text-cyanNeon text-xs tracking-widest font-bold">JARVIS AGENT</div>
+                    <div class="text-[10px] text-gray-400 font-mono">AUTONOMOUS MODE</div>
+                </div>
             </div>
         </div>
 
@@ -216,7 +253,6 @@ HTML_TEMPLATE = """
         </h2>
 
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-            <!-- Steps -->
             <div class="bg-cardBg border-glow p-4 rounded-xl text-center flex flex-col items-center">
                 <div class="w-10 h-10 rounded-lg bg-cyanNeon/10 border border-cyanNeon text-cyanNeon flex items-center justify-center font-bold mb-3">01</div>
                 <h3 class="font-orbitron text-xs font-bold text-white">SCAN</h3>
@@ -255,10 +291,8 @@ HTML_TEMPLATE = """
         </div>
     </section>
 
-    <!-- FLYWHEEL & ROADMAP -->
+    <!-- ROADMAP & FLYWHEEL -->
     <section id="roadmap" class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        <!-- Flywheel -->
         <div class="bg-cardBg border-glow p-6 rounded-xl flex flex-col justify-between">
             <h3 class="font-orbitron text-lg font-bold text-white text-center mb-6">THE $JDEGEN FLYWHEEL</h3>
             
@@ -282,7 +316,6 @@ HTML_TEMPLATE = """
             </p>
         </div>
 
-        <!-- Roadmap -->
         <div class="bg-cardBg border-glow p-6 rounded-xl">
             <h3 class="font-orbitron text-lg font-bold text-white mb-6">ROADMAP</h3>
 
@@ -322,35 +355,13 @@ HTML_TEMPLATE = """
         </div>
     </section>
 
-    <!-- NEWSLETTER CTA -->
-    <section class="max-w-7xl mx-auto px-6 py-12">
-        <div class="bg-cardBg border-glow rounded-xl p-8 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div>
-                <h3 class="font-orbitron text-2xl font-bold text-white">READY TO ENTER THE <span class="text-cyanNeon">MATRIX?</span></h3>
-                <p class="text-gray-400 text-sm mt-2">Join the degen army and follow Jarvis on his mission.</p>
-                
-                <div class="flex gap-3 mt-4">
-                    <a href="#" class="px-4 py-2 text-xs font-mono border border-cyanNeon text-cyanNeon rounded hover:bg-cyanNeon/10">JOIN TELEGRAM ✈</a>
-                    <a href="#" class="px-4 py-2 text-xs font-mono border border-gray-700 text-gray-300 rounded hover:border-white">FOLLOW ON X 𝕏</a>
-                </div>
-            </div>
-
-            <form action="/subscribe" method="POST" class="w-full md:w-auto flex flex-col gap-3">
-                <span class="font-orbitron text-xs font-bold text-white">GET JARVIS SIGNALS</span>
-                <input type="email" name="email" placeholder="Your email address" required class="px-4 py-3 bg-black/80 border border-gray-800 rounded text-sm text-white focus:outline-none focus:border-cyanNeon w-full md:w-72">
-                <button type="submit" class="px-6 py-3 font-orbitron font-bold text-xs bg-cyanNeon text-black rounded hover:bg-white transition">
-                    SUBSCRIBE
-                </button>
-            </form>
-        </div>
-    </section>
-
     <!-- FOOTER -->
     <footer class="border-t border-gray-800 bg-void py-8 px-6 text-xs font-mono text-gray-500">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div>
+            <div class="flex items-center gap-2">
+                <img src="{logo_b64}" alt="Logo" class="w-6 h-6 rounded-full border border-cyanNeon">
                 <span class="font-orbitron font-bold text-white text-sm">JARVISDEGEN</span>
-                <span class="text-cyanNeon ml-2">$JDEGEN</span>
+                <span class="text-cyanNeon">$JDEGEN</span>
             </div>
 
             <div class="text-center">
@@ -368,15 +379,5 @@ HTML_TEMPLATE = """
 </html>
 """
 
-@app.route('/')
-def home():
-    return render_template_string(HTML_TEMPLATE)
-
-@app.route('/subscribe', methods=['POST'])
-def subscribe():
-    email = request.form.get('email')
-    # Traitement de l'inscription à la newsletter
-    return jsonify({"status": "success", "message": f"Inscrit avec succès : {email}"})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# Affichage dans l'application Streamlit
+components.html(HTML_TEMPLATE, height=2200, scrolling=True)
