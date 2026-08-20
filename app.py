@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 import os
+import mimetypes
 
 # Configuration de la page Streamlit
 st.set_page_config(
@@ -12,14 +13,22 @@ st.set_page_config(
 )
 
 def get_image_base64(path):
+    # Résolution dynamique du chemin d'accès
+    if not os.path.exists(path):
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(base_dir, path)
+
     if os.path.exists(path):
+        mime_type, _ = mimetypes.guess_type(path)
+        if not mime_type:
+            mime_type = "image/png"
+            
         with open(path, "rb") as image_file:
-            encoded = base64.b64encode(image_file.read()).decode()
-            ext = path.split('.')[-1]
-            return f"data:image/{ext};base64,{encoded}"
+            encoded = base64.b64encode(image_file.read()).decode('utf-8')
+            return f"data:{mime_type};base64,{encoded}"
     return ""
 
-# Récupération des images locales
+# Récupération sécurisée des images locales
 logo_b64 = get_image_base64("static/logo.png")
 hero_b64 = get_image_base64("static/hero.jpg")
 bras_b64 = get_image_base64("static/bras_croisees.png")
@@ -320,7 +329,7 @@ HTML_TEMPLATE = f"""
             
             <!-- Robot Image (bras_croisees.png) -->
             <div class="lg:col-span-4 flex justify-center lg:justify-start">
-                <img src="{bras_b64}" alt="Jarvis Robot Bras Croisés" class="max-h-72 object-contain drop-shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                <img src="{bras_b64}" alt="Jarvis Robot Bras Croisés" class="max-h-72 w-auto object-contain drop-shadow-[0_0_20px_rgba(0,240,255,0.3)]">
             </div>
 
             <!-- Middle Text & Buttons -->
@@ -395,4 +404,4 @@ HTML_TEMPLATE = f"""
 </html>
 """
 
-components.html(HTML_TEMPLATE, height=2600, scrolling=True)
+components.html(HTML_TEMPLATE, height=2700, scrolling=True)
