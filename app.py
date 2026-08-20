@@ -2,7 +2,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 import base64
 import os
-import mimetypes
 
 # Configuration de la page Streamlit
 st.set_page_config(
@@ -12,26 +11,37 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-def get_image_base64(path):
-    # Résolution dynamique du chemin d'accès
-    if not os.path.exists(path):
+def get_image_base64_explicit(path, forced_format=None):
+    """
+    Lit un fichier image local et le convertit en chaîne Base64.
+    Recherche automatique du chemin relatif et absolu.
+    """
+    # 1. Vérification si le chemin existe tel quel
+    target_path = path
+    if not os.path.exists(target_path):
+        # 2. Sinon, recherche par rapport au dossier du script courant
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        path = os.path.join(base_dir, path)
+        target_path = os.path.join(base_dir, path)
 
-    if os.path.exists(path):
-        mime_type, _ = mimetypes.guess_type(path)
-        if not mime_type:
-            mime_type = "image/png"
-            
-        with open(path, "rb") as image_file:
+    if os.path.exists(target_path):
+        # Détermination du format d'image (png, jpeg, etc.)
+        if forced_format:
+            img_format = forced_format
+        else:
+            ext = os.path.splitext(target_path)[1].lower().replace('.', '')
+            img_format = 'jpeg' if ext in ['jpg', 'jpeg'] else 'png'
+
+        with open(target_path, "rb") as image_file:
             encoded = base64.b64encode(image_file.read()).decode('utf-8')
-            return f"data:{mime_type};base64,{encoded}"
+            return f"data:image/{img_format};base64,{encoded}"
+            
+    # Retourne une chaîne vide si l'image n'est pas trouvée
     return ""
 
-# Récupération sécurisée des images locales
-logo_b64 = get_image_base64("static/logo.png")
-hero_b64 = get_image_base64("static/hero.jpg")
-bras_b64 = get_image_base64("static/bras_croisees.png")
+# Chargement sécurisé avec types MIME explicitement définis
+logo_b64 = get_image_base64_explicit("static/logo.png", forced_format="png")
+hero_b64 = get_image_base64_explicit("static/hero.jpg", forced_format="jpeg")
+bras_b64 = get_image_base64_explicit("static/bras_croisees.png", forced_format="png")
 
 st.markdown("""
     <style>
