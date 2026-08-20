@@ -20,7 +20,6 @@ def load_and_debug_image(relative_path):
     """
     Tente de charger une image et affiche des logs de débogage dans la barre latérale.
     """
-    # 1. Obtenir le dossier absolu du script
     current_dir = os.path.dirname(os.path.abspath(__file__))
     absolute_path = os.path.join(current_dir, relative_path)
     
@@ -39,7 +38,6 @@ def load_and_debug_image(relative_path):
                 data = f.read()
                 encoded = base64.b64encode(data).decode('utf-8')
                 
-                # Détermination de l'extension
                 ext = os.path.splitext(final_path)[1].lower().replace('.', '')
                 mime_type = 'image/jpeg' if ext in ['jpg', 'jpeg'] else 'image/png'
                 
@@ -165,11 +163,9 @@ HTML_TEMPLATE = f"""
 
             <div class="hidden md:flex items-center gap-6 text-sm font-semibold tracking-wider text-gray-300">
                 <a href="#home" class="text-cyanNeon hover:text-white transition">HOME</a>
-                <a href="#about" class="hover:text-cyanNeon transition">ABOUT</a>
                 <a href="#works" class="hover:text-cyanNeon transition">HOW IT WORKS</a>
                 <a href="#tokenomics" class="hover:text-cyanNeon transition">TOKENOMICS</a>
                 <a href="#roadmap" class="hover:text-cyanNeon transition">ROADMAP</a>
-                <a href="#faq" class="hover:text-cyanNeon transition">FAQ</a>
             </div>
 
             <div class="flex items-center gap-3">
@@ -264,6 +260,151 @@ HTML_TEMPLATE = f"""
         </div>
     </section>
 
+    <!-- HOW MY BRAIN WORKS SECTION -->
+    <section id="works" class="max-w-7xl mx-auto px-6 py-12">
+        <div class="text-center mb-10">
+            <h2 class="font-orbitron text-2xl md:text-3xl font-black text-white">
+                HOW MY BRAIN WORKS <span class="text-cyanNeon">// ARCHITECTURE</span>
+            </h2>
+            <p class="text-gray-400 text-xs font-mono mt-2">Autonomous execution pipeline operating 24/7 on Solana DEXs</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="bg-cardBg border-glow p-5 rounded-xl space-y-3">
+                <div class="text-cyanNeon font-mono text-xs font-bold">[01] DATA INGESTION</div>
+                <h3 class="font-orbitron text-white text-base font-bold">MINT &amp; POOL SCAN</h3>
+                <p class="text-gray-400 text-xs leading-relaxed">
+                    Monitors Raydium, Pump.fun, and Orca for new token mints, liquidity additions, and abnormal volume spikes.
+                </p>
+            </div>
+
+            <div class="bg-cardBg border-glow p-5 rounded-xl space-y-3">
+                <div class="text-cyanNeon font-mono text-xs font-bold">[02] SAFETY CHECK</div>
+                <h3 class="font-orbitron text-white text-base font-bold">RUG &amp; DEV AUDIT</h3>
+                <p class="text-gray-400 text-xs leading-relaxed">
+                    Filters out honeypots, mintable supply tokens, top-holder concentration, and suspicious developer wallets.
+                </p>
+            </div>
+
+            <div class="bg-cardBg border-glow p-5 rounded-xl space-y-3">
+                <div class="text-cyanNeon font-mono text-xs font-bold">[03] EXECUTION</div>
+                <h3 class="font-orbitron text-white text-base font-bold">SNIPE &amp; MANAGE</h3>
+                <p class="text-gray-400 text-xs leading-relaxed">
+                    Executes automated swaps via Jupiter API with dynamic slippage and automated trailing stop-losses.
+                </p>
+            </div>
+
+            <div class="bg-cardBg border-glow p-5 rounded-xl space-y-3 border-cyanNeon/50">
+                <div class="text-burnOrange font-mono text-xs font-bold">[04] RECYCLE</div>
+                <h3 class="font-orbitron text-white text-base font-bold">BUYBACK &amp; BURN</h3>
+                <p class="text-gray-400 text-xs leading-relaxed">
+                    30% of all generated profits automatically market-buy $JDEGEN and send it directly to the burn address.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TOKENOMICS SECTION -->
+    <section id="tokenomics" class="max-w-7xl mx-auto px-6 py-12">
+        <div class="bg-cardBg border-glow rounded-2xl p-6 lg:p-8">
+            <div class="text-center mb-8">
+                <h2 class="font-orbitron text-2xl font-black text-white">TOKENOMICS</h2>
+                <p class="text-cyanNeon font-mono text-xs">TOKEN SUPPLY: 1,000,000,000 $JDEGEN</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center font-mono">
+                <div class="bg-black/50 p-4 rounded-xl border border-gray-800">
+                    <div class="text-2xl font-orbitron font-bold text-white">90%</div>
+                    <div class="text-xs text-gray-400 mt-1">CIRCULATING / LIQUIDITY</div>
+                </div>
+                <div class="bg-black/50 p-4 rounded-xl border border-gray-800">
+                    <div class="text-2xl font-orbitron font-bold text-cyanNeon">10%</div>
+                    <div class="text-xs text-gray-400 mt-1">TREASURY &amp; AI AGENT FUND</div>
+                </div>
+                <div class="bg-black/50 p-4 rounded-xl border border-gray-800">
+                    <div class="text-2xl font-orbitron font-bold text-burnOrange">0%</div>
+                    <div class="text-xs text-gray-400 mt-1">TAX (BUY / SELL)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROADMAP & FLYWHEEL SECTION -->
+    <section id="roadmap" class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- FLYWHEEL -->
+        <div class="bg-cardBg border-glow p-6 rounded-xl flex flex-col justify-between relative overflow-hidden">
+            <h3 class="font-orbitron text-lg font-bold text-white text-center mb-4">THE $JDEGEN FLYWHEEL</h3>
+            
+            <div class="relative my-8 flex justify-center items-center h-64">
+                <div class="absolute w-56 h-56 rounded-full border-2 border-dashed border-cyanNeon/60 animate-spin-slow"></div>
+
+                <div class="z-10 flex flex-col items-center justify-center text-center">
+                    <span class="font-orbitron font-extrabold text-cyanNeon text-base tracking-widest mb-1">$JDEGEN</span>
+                    <div class="flex items-center gap-1.5 my-1">
+                        <span class="font-orbitron text-xs font-bold text-burnOrange tracking-wider">BURN</span>
+                        <div class="text-burnOrange animate-flame">
+                            <svg class="w-10 h-10" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-1.048c-2.5 1.249-4.87 3.324-5.32 6.002-.32 1.905.15 3.82 1.28 5.308-1.5-.27-2.82-.87-3.905-1.745a1 1 0 00-1.52 1.205c1.69 2.58 4.54 4.28 7.74 4.67 5.12.63 9.8-3.05 10.23-8.15.22-2.58-.69-5.11-2.45-6.94-.31-.33-.78-.45-1.205-.3-.425.15-.72.525-.72.98 0 1.16-.39 2.27-1.12 3.17-.55-.91-1.1-1.89-1.56-3.15z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute top-2 left-2 md:left-6 text-xs font-mono text-cyanNeon bg-black/90 p-2.5 rounded-lg border border-cyanNeon/40 backdrop-blur-md shadow-lg">
+                    <span class="font-bold text-sm block font-orbitron">70%</span> RE-TRADE
+                </div>
+
+                <div class="absolute bottom-2 right-2 md:right-6 text-xs font-mono text-profitGreen bg-black/90 p-2.5 rounded-lg border border-profitGreen/40 backdrop-blur-md shadow-lg">
+                    <span class="font-bold text-sm block font-orbitron">30%</span> BUYBACK
+                </div>
+            </div>
+
+            <p class="text-center text-xs font-mono text-gray-400 mt-2">
+                Profits from trading fuel the engine.<br>More volume. More burns. More scarcity.
+            </p>
+        </div>
+
+        <!-- ROADMAP -->
+        <div class="bg-cardBg border-glow p-6 rounded-xl">
+            <h3 class="font-orbitron text-lg font-bold text-white mb-6">ROADMAP</h3>
+
+            <div class="space-y-6 font-mono text-xs">
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">01</div>
+                    <div>
+                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 01 - AWAKEN JARVIS</h4>
+                        <p class="text-gray-400 mt-1">Branding • AI personality • Architecture • Paper trading</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">02</div>
+                    <div>
+                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 02 - CONNECT JARVIS</h4>
+                        <p class="text-gray-400 mt-1">Solana data • Market scanner • Risk engine • Telegram &amp; X</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">03</div>
+                    <div>
+                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 03 - RELEASE $JDEGEN</h4>
+                        <p class="text-gray-400 mt-1">Fair launch • Token deployment • Public treasury</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-cyanNeon/20 border border-cyanNeon text-cyanNeon flex items-center justify-center shrink-0">04</div>
+                    <div>
+                        <h4 class="font-orbitron text-white font-bold text-sm">PROTOCOL 04 - AUTONOMOUS MODE</h4>
+                        <p class="text-gray-400 mt-1">Live trading • Public trades • Buyback &amp; burn • Dashboard</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- MATRIX CTA SECTION -->
     <section class="max-w-7xl mx-auto px-6 py-8">
         <div class="bg-cardBg border-glow rounded-2xl p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative overflow-hidden">
@@ -348,4 +489,4 @@ HTML_TEMPLATE = f"""
 </html>
 """
 
-components.html(HTML_TEMPLATE, height=2700, scrolling=True)
+components.html(HTML_TEMPLATE, height=3400, scrolling=True)
